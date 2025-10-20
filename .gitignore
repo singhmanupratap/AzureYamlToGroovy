@@ -384,3 +384,8 @@ Jenkinsfile
 # Temporary directories
 temp/
 tmp/
+devops/
+*.yml
+launch.json
+tasks.json
+settings.json

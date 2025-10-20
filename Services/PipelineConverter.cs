@@ -26,15 +26,27 @@ namespace AzureYamlToGroovy.Services
 
             // Parse the Azure DevOps YAML pipeline
             Console.WriteLine("📖 Parsing Azure DevOps YAML pipeline...");
+            Console.WriteLine($"🔍 Base YAML file: {yamlFilePath}");
+            Console.WriteLine($"🔍 Base directory: {Path.GetDirectoryName(yamlFilePath)}");
+            Console.WriteLine();
+
             var pipeline = await _yamlParser.ParsePipelineAsync(yamlFilePath);
-            
+
             Console.WriteLine($"✅ Found {pipeline.Stages.Count} stage(s):");
             foreach (var stage in pipeline.Stages)
             {
                 Console.WriteLine($"   - {stage.DisplayName} ({stage.Jobs.Count} job(s))");
+                if (stage.Template != null)
+                {
+                    Console.WriteLine($"     🔗 Template: {stage.Template.Template}");
+                }
                 foreach (var job in stage.Jobs)
                 {
                     Console.WriteLine($"     └─ {job.DisplayName} ({job.Steps.Count} step(s))");
+                    if (job.Template != null)
+                    {
+                        Console.WriteLine($"        🔗 Template: {job.Template.Template}");
+                    }
                 }
             }
             Console.WriteLine();
@@ -58,16 +70,16 @@ namespace AzureYamlToGroovy.Services
         {
             Console.WriteLine("📋 Conversion Summary:");
             Console.WriteLine("===================");
-            
+
             var files = Directory.GetFiles(outputDirectory, "*.*", SearchOption.AllDirectories);
-            
+
             foreach (var file in files.OrderBy(f => f))
             {
                 var fileName = Path.GetFileName(file);
                 var fileSize = new FileInfo(file).Length;
                 Console.WriteLine($"   📄 {fileName} ({fileSize} bytes)");
             }
-            
+
             Console.WriteLine();
             Console.WriteLine("🚀 Next Steps:");
             Console.WriteLine("   1. Review the generated Groovy files");
@@ -81,7 +93,7 @@ namespace AzureYamlToGroovy.Services
             var yamlFiles = Directory.GetFiles(yamlBasePath, "*.yml", SearchOption.AllDirectories)
                                     .Where(f => !f.EndsWith(".delete.yml"))
                                     .ToArray();
-            
+
             foreach (var yamlFile in yamlFiles)
             {
                 var deleteFile = yamlFile.Replace(".yml", ".delete.yml");
